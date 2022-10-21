@@ -1,0 +1,26 @@
+$CMObject = new-object -com "UIResource.UIResourceMgr" #Create CM object 
+$cacheInfo = $CMObject.GetCacheInfo() # get CCM cache info
+$lastUsed = 30  # laste use of folder
+$objects = $cacheinfo.GetCacheElements() | select-object location , LastReferenceTime, ContentSize
+
+$StartDate=(GET-DATE)
+
+$i=0
+
+out-file -append  -filepath C:\Install\Msi\Logs\cacheremoval.log "Clean CccmCache"  # write all things on log
+
+
+# delete all folder unused on ccm cache
+foreach ( $item in $objects )
+{
+   
+  $diffDate = $StartDate - $item.LastReferenceTime
+
+   if ( $diffDate.Days -gt $lastUsed  )
+    {
+        $i++
+        remove-item -path $item.location
+       
+    }
+
+ }
